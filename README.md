@@ -30,15 +30,13 @@ func main() {
   GinPassportGoogle.Routes(opts, googleAuth)
 
   // setup a customized callback url...
-  googleAuth.GET("/callback", GinPassportGoogle.GetProfile(), func(c *gin.Context) {
-    user, userError := c.Get(GinPassportGoogle.KeyNamespace)
-    if ! userError {
+  googleAuth.GET("/callback", GinPassportGoogle.Middleware(), func(c *gin.Context) {
+    user := GinPassportGoogle.GetProfile()
+    if user == nil {
       c.AbortWithStatus(500)
       return
     }
 
-    // cast gin's middleware variable
-    googleUser := user.(*GinPassportGoogle.Profile)
     c.String(200, "Got it!")
   })
 }
