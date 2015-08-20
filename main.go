@@ -2,6 +2,7 @@ package GinPassportGoogle
 
 import (
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"net/http"
 
@@ -34,13 +35,13 @@ func Middleware() gin.HandlerFunc {
 	}
 }
 
-func GetProfile(c *gin.Context) *Profile {
+func GetProfile(c *gin.Context) (*Profile, error) {
 	user, exists := c.Get(KeyNamespace)
 	if !exists {
-		return nil
+		return nil, errors.New("GinPassportGoogle namespace key doesn't exist")
 	}
 
-	return user.(*Profile)
+	return user.(*Profile), nil
 }
 
 func getProfile(c *gin.Context) {

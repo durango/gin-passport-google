@@ -31,8 +31,8 @@ func main() {
 
   // setup a customized callback url...
   googleAuth.GET("/callback", GinPassportGoogle.Middleware(), func(c *gin.Context) {
-    user := GinPassportGoogle.GetProfile()
-    if user == nil {
+    user, err := GinPassportGoogle.GetProfile()
+    if user == nil || err != nil {
       c.AbortWithStatus(500)
       return
     }
