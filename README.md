@@ -5,32 +5,33 @@ Gin middleware for obtaining common google+ profile information. I don't persona
 ## Example
 
 ```go
+package main
+
 import (
   "github.com/gin-gonic/gin"
-
   "golang.org/x/oauth2"
   "golang.org/x/oauth2/google"
-
   "github.com/durango/gin-passport-google"
 )
 
 func main() {
-  opts, _ := oauth2.New(
-    oauth2.Client("ClientId", "YourSecretKey"),
-    oauth2.RedirectURL("Your redirect URL"),
-    oauth2.Scope("https://www.googleapis.com/auth/userinfo.email", "https://www.googleapis.com/auth/userinfo.profile"),
-    google.Endpoint(),
-  )
+  opts := &oauth2.Config{
+    RedirectURL:  "http://localhost:8080/auth/google/callback",
+    ClientID:     "CLIENT_ID",
+    ClientSecret: "CLIENT_SECRET",
+    Scopes:       []string{"email", "public_profile"},
+    Endpoint:     google.Endpoint,
+  }
 
   router := gin.Default()
 
-  googleAuth := router.Group("/auth/google")
+  auth := router.Group("/auth/google")
 
   // setup the configuration and mount the "/login" route
-  GinPassportGoogle.Routes(opts, googleAuth)
+  GinPassportGoogle.Routes(opts, auth)
 
   // setup a customized callback url...
-  googleAuth.GET("/callback", GinPassportGoogle.Middleware(), func(c *gin.Context) {
+  auth.GET("/callback", GinPassportGoogle.Middleware(), func(c *gin.Context) {
     user, err := GinPassportGoogle.GetProfile(c)
     if user == nil || err != nil {
       c.AbortWithStatus(500)
@@ -39,5 +40,7 @@ func main() {
 
     c.String(200, "Got it!")
   })
+
+  router.Run()
 }
 ```
